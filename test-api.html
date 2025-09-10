@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Restaurant API Test</h1>
+    <div id="results"></div>
+    
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="testMenu()">Test Menu</button>
+    <button onclick="testDebug()">Test Debug</button>
+    
+    <script>
+        const baseUrl = window.location.origin + '/restaurant-ordering-system';
+        
+        function addResult(message, isSuccess = true) {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${isSuccess ? 'success' : 'error'}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+        
+        async function testLogin() {
+            try {
+                const response = await fetch(`${baseUrl}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'email=admin@restaurant.com&password=admin123'
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    addResult(`Login API: ${response.status} - ${JSON.stringify(result)}`);
+                } else {
+                    addResult(`Login API: ${response.status} - ${response.statusText}`, false);
+                }
+            } catch (error) {
+                addResult(`Login API Error: ${error.message}`, false);
+            }
+        }
+        
+        async function testMenu() {
+            try {
+                const response = await fetch(`${baseUrl}/api/menu`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    addResult(`Menu API: ${response.status} - ${JSON.stringify(result)}`);
+                } else {
+                    addResult(`Menu API: ${response.status} - ${response.statusText}`, false);
+                }
+            } catch (error) {
+                addResult(`Menu API Error: ${error.message}`, false);
+            }
+        }
+        
+        async function testDebug() {
+            try {
+                const response = await fetch(`${baseUrl}/api/debug`);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    addResult(`Debug API: ${response.status} - ${JSON.stringify(result)}`);
+                } else {
+                    addResult(`Debug API: ${response.status} - ${response.statusText}`, false);
+                }
+            } catch (error) {
+                addResult(`Debug API Error: ${error.message}`, false);
+            }
+        }
+    </script>
+</body>
+</html>

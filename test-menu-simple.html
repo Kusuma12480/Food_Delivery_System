@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Menu Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .menu-item { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🍽️ Simple Menu Test</h1>
+    
+    <div>
+        <button onclick="testMenuAPI()">Test Menu API</button>
+        <button onclick="testDatabase()">Test Database</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div id="results"></div>
+    <div id="menuDisplay"></div>
+
+    <script>
+        const baseUrl = window.location.origin + '/restaurant-ordering-system';
+
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('menuDisplay').innerHTML = '';
+        }
+
+        async function testMenuAPI() {
+            addResult('Testing Menu API...', 'info');
+            
+            try {
+                const url = `${baseUrl}/api/menu`;
+                addResult(`Fetching from: ${url}`, 'info');
+                
+                const response = await fetch(url);
+                addResult(`Response Status: ${response.status} ${response.statusText}`, 'info');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                addResult(`Response Data: ${JSON.stringify(result, null, 2)}`, 'info');
+                
+                if (result.menu && Array.isArray(result.menu)) {
+                    addResult(`✅ SUCCESS: Found ${result.menu.length} menu items`, 'success');
+                    displayMenuItems(result.menu);
+                } else {
+                    addResult('❌ ERROR: No menu items in response', 'error');
+                }
+                
+            } catch (error) {
+                addResult(`❌ ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDatabase() {
+            addResult('Testing Database Connection...', 'info');
+            
+            try {
+                const url = `${baseUrl}/api/debug`;
+                addResult(`Fetching from: ${url}`, 'info');
+                
+                const response = await fetch(url);
+                const result = await response.json();
+                
+                addResult(`Database Test Result: ${JSON.stringify(result, null, 2)}`, 'info');
+                
+            } catch (error) {
+                addResult(`❌ Database Test Error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayMenuItems(menuItems) {
+            const menuDisplay = document.getElementById('menuDisplay');
+            menuDisplay.innerHTML = '<h2>Menu Items:</h2>';
+
+            if (!menuItems || menuItems.length === 0) {
+                menuDisplay.innerHTML += '<p>No menu items found</p>';
+                return;
+            }
+
+            menuItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'menu-item';
+                itemDiv.innerHTML = `
+                    <h3>${item.name}</h3>
+                    <p><strong>Price:</strong> $${item.price}</p>
+                    <p><strong>ID:</strong> ${item.id}</p>
+                `;
+                menuDisplay.appendChild(itemDiv);
+            });
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            addResult('Page loaded. Ready to test.', 'info');
+        };
+    </script>
+</body>
+</html>
